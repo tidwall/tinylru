@@ -166,3 +166,20 @@ func (lru *LRU) Range(iter func(key string, value interface{}) bool) {
 		}
 	}
 }
+
+// Reverse iterates over all key/values in the order of least recently to
+// most recently used items.
+// It's not safe to call other LRU operations while ranging.
+func (lru *LRU) Reverse(iter func(key string, value interface{}) bool) {
+	lru.mu.Lock()
+	defer lru.mu.Unlock()
+	if tail := lru.tail; tail != nil {
+		item := tail.prev
+		for item != lru.head {
+			if !iter(item.key, item.value) {
+				return
+			}
+			item = item.prev
+		}
+	}
+}

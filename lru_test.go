@@ -97,6 +97,27 @@ func TestLRU(t *testing.T) {
 		t.Fatal("mismatch")
 	}
 
+	idx = size - 1
+	res = make([]tItem, size)
+	cache.Reverse(func(key string, value interface{}) bool {
+		res[idx] = tItem{key: key, val: value.(int)}
+		idx--
+		return true
+	})
+	for i, j := len(items)-1, 0; i >= len(items)-size; i, j = i-1, j+1 {
+		if items[i] != res[j] {
+			t.Fatal("mismatch")
+		}
+	}
+	var least tItem
+	cache.Reverse(func(key string, value interface{}) bool {
+		least = tItem{key: key, val: value.(int)}
+		return false
+	})
+	if items[len(items)-size] != least {
+		t.Fatal("mismatch")
+	}
+
 	// Get items
 	for i := 0; i < len(items); i++ {
 		value, ok := cache.Get(items[i].key)

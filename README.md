@@ -28,13 +28,13 @@ var cache tinylru.LRU
 // hold before evicting old items. The default size is 256.
 cache.Resize(1024)
 
-// Set a key. Returns the previous value and ok a previous value exists.
+// Set a key. Returns the previous value and ok if a previous value exists.
 prev, ok := cache.Set("hello", "world")
 
-// Get a key. Returns the value and ok if the value exists. This also moves
+// Get a key. Returns the value and ok if the value exists.
 value, ok := cache.Get("hello")
 
-// Delete a key. Returns the deleted value and ok if the previous value exists.
+// Delete a key. Returns the deleted value and ok if a previous value exists.
 prev, ok := tr.Delete("hello")
 ```
 

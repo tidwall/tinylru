@@ -53,4 +53,4 @@ Josh Baker [@tidwall](https://twitter.com/tidwall)
 
 ### License
 
-`tinybtree` source code is available under the MIT License.
+`tinylru` source code is available under the MIT License.

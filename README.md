@@ -18,8 +18,6 @@ This will retrieve the library.
 
 ### Usage
 
-Keys and values are interfaces.
-
 ```go
 // Create an LRU cache
 var cache tinylru.LRU

@@ -20,7 +20,7 @@ type lruItem struct {
 // LRU implements an LRU cache
 type LRU struct {
 	mu    sync.Mutex          // protect all things
-	size  int                 // max number of items. Must be at least two
+	size  int                 // max number of items. Must be at least 1
 	items map[string]*lruItem // active items
 	head  *lruItem            // head of list
 	tail  *lruItem            // tail of list
@@ -107,6 +107,7 @@ func (lru *LRU) SetEvicted(key string, value interface{}) (prev interface{},
 		lru.items[key] = item
 	} else {
 		prev, replaced = item.value, true
+		item.value = value
 		if lru.head.next != item {
 			lru.pop(item)
 			lru.push(item)

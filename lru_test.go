@@ -162,9 +162,9 @@ func TestLRU(t *testing.T) {
 		if !deleted {
 			t.Fatal("expected true")
 		}
-		if prev != items[i].val-1 {
+		if prev != items[i].val {
 			t.Fatalf("expected %v, got %v",
-				items[i].val-1, prev)
+				items[i].val, prev)
 
 		}
 	}
@@ -207,5 +207,15 @@ func BenchmarkSet(b *testing.B) {
 	var cache LRU
 	for i := 0; i < b.N; i++ {
 		cache.Set(items[i].key, items[i].val)
+	}
+}
+
+func TestLRUInt(t *testing.T) {
+	var cache LRU
+	cache.Set("123", 123)
+	cache.Set("123", 456)
+	v, _ := cache.Get("123")
+	if v.(int) != 456 {
+		t.Fatalf("expected %v, got %v", 456, v)
 	}
 }

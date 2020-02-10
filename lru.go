@@ -11,7 +11,7 @@ import "sync"
 const DefaultSize = 256
 
 type lruItem struct {
-	key   string      // user-defined key
+	key   interface{} // user-defined key
 	value interface{} // user-defined value
 	prev  *lruItem    // prev item in list. More recently used
 	next  *lruItem    // next item in list. Less recently used
@@ -19,16 +19,16 @@ type lruItem struct {
 
 // LRU implements an LRU cache
 type LRU struct {
-	mu    sync.Mutex          // protect all things
-	size  int                 // max number of items. Must be at least 1
-	items map[string]*lruItem // active items
-	head  *lruItem            // head of list
-	tail  *lruItem            // tail of list
+	mu    sync.Mutex               // protect all things
+	size  int                      // max number of items.
+	items map[interface{}]*lruItem // active items
+	head  *lruItem                 // head of list
+	tail  *lruItem                 // tail of list
 }
 
 //go:noinline
 func (lru *LRU) init() {
-	lru.items = make(map[string]*lruItem)
+	lru.items = make(map[interface{}]*lruItem)
 	lru.head = new(lruItem)
 	lru.tail = new(lruItem)
 	lru.head.next = lru.tail
@@ -61,7 +61,7 @@ func (lru *LRU) push(item *lruItem) {
 // the number of items currently in the cache, then items will be evicted.
 // Returns evicted items.
 // This operation will panic if the size is less than one.
-func (lru *LRU) Resize(size int) (evictedKeys []string,
+func (lru *LRU) Resize(size int) (evictedKeys []interface{},
 	evictedValues []interface{}) {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()
@@ -86,8 +86,9 @@ func (lru *LRU) Len() int {
 
 // SetEvicted sets or replaces a value for a key. If this operation causes an
 // eviction then the evicted item is returned.
-func (lru *LRU) SetEvicted(key string, value interface{}) (prev interface{},
-	replaced bool, evictedKey string, evictedValue interface{}, evicted bool) {
+func (lru *LRU) SetEvicted(key interface{}, value interface{}) (
+	prev interface{}, replaced bool, evictedKey interface{},
+	evictedValue interface{}, evicted bool) {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()
 	if lru.items == nil {
@@ -117,14 +118,14 @@ func (lru *LRU) SetEvicted(key string, value interface{}) (prev interface{},
 }
 
 // Set or replace a value for a key.
-func (lru *LRU) Set(key string, value interface{}) (prev interface{},
+func (lru *LRU) Set(key interface{}, value interface{}) (prev interface{},
 	replaced bool) {
 	prev, replaced, _, _, _ = lru.SetEvicted(key, value)
 	return prev, replaced
 }
 
 // Get a value for key
-func (lru *LRU) Get(key string) (value interface{}, ok bool) {
+func (lru *LRU) Get(key interface{}) (value interface{}, ok bool) {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()
 	item := lru.items[key]
@@ -139,7 +140,7 @@ func (lru *LRU) Get(key string) (value interface{}, ok bool) {
 }
 
 // Delete a value for a key
-func (lru *LRU) Delete(key string) (prev interface{}, deleted bool) {
+func (lru *LRU) Delete(key interface{}) (prev interface{}, deleted bool) {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()
 	item := lru.items[key]
@@ -154,7 +155,7 @@ func (lru *LRU) Delete(key string) (prev interface{}, deleted bool) {
 // Range iterates over all key/values in the order of most recently to
 // least recently used items.
 // It's not safe to call other LRU operations while ranging.
-func (lru *LRU) Range(iter func(key string, value interface{}) bool) {
+func (lru *LRU) Range(iter func(key interface{}, value interface{}) bool) {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()
 	if head := lru.head; head != nil {
@@ -171,7 +172,7 @@ func (lru *LRU) Range(iter func(key string, value interface{}) bool) {
 // Reverse iterates over all key/values in the order of least recently to
 // most recently used items.
 // It's not safe to call other LRU operations while ranging.
-func (lru *LRU) Reverse(iter func(key string, value interface{}) bool) {
+func (lru *LRU) Reverse(iter func(key interface{}, value interface{}) bool) {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()
 	if tail := lru.tail; tail != nil {

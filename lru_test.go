@@ -14,7 +14,7 @@ func init() {
 }
 
 type tItem struct {
-	key string
+	key interface{}
 	val int
 }
 
@@ -78,7 +78,7 @@ func TestLRU(t *testing.T) {
 
 	idx := size - 1
 	res := make([]tItem, size)
-	cache.Range(func(key string, value interface{}) bool {
+	cache.Range(func(key, value interface{}) bool {
 		res[idx] = tItem{key: key, val: value.(int)}
 		idx--
 		return true
@@ -89,7 +89,7 @@ func TestLRU(t *testing.T) {
 		}
 	}
 	var recent tItem
-	cache.Range(func(key string, value interface{}) bool {
+	cache.Range(func(key, value interface{}) bool {
 		recent = tItem{key: key, val: value.(int)}
 		return false
 	})
@@ -99,7 +99,7 @@ func TestLRU(t *testing.T) {
 
 	idx = size - 1
 	res = make([]tItem, size)
-	cache.Reverse(func(key string, value interface{}) bool {
+	cache.Reverse(func(key, value interface{}) bool {
 		res[idx] = tItem{key: key, val: value.(int)}
 		idx--
 		return true
@@ -110,7 +110,7 @@ func TestLRU(t *testing.T) {
 		}
 	}
 	var least tItem
-	cache.Reverse(func(key string, value interface{}) bool {
+	cache.Reverse(func(key, value interface{}) bool {
 		least = tItem{key: key, val: value.(int)}
 		return false
 	})
@@ -212,9 +212,9 @@ func BenchmarkSet(b *testing.B) {
 
 func TestLRUInt(t *testing.T) {
 	var cache LRU
-	cache.Set("123", 123)
-	cache.Set("123", 456)
-	v, _ := cache.Get("123")
+	cache.Set(123, 123)
+	cache.Set(123, 456)
+	v, _ := cache.Get(123)
 	if v.(int) != 456 {
 		t.Fatalf("expected %v, got %v", 456, v)
 	}

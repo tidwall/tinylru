@@ -18,7 +18,7 @@ This will retrieve the library.
 
 ### Usage
 
-Keys are strings, values are interfaces.
+Keys and values are interfaces.
 
 ```go
 // Create an LRU cache

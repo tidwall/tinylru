@@ -42,7 +42,7 @@ function.
 
 ```go
 // Set a key and return the evicted item, if any.
-prev, ok, evictedKey, evictedValue, evicted := cache.SetEvicted("hello")
+prev, ok, evictedKey, evictedValue, evicted := cache.SetEvicted("hello", "jello")
 ```
 
 ### Contact

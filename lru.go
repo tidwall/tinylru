@@ -19,7 +19,7 @@ type lruItem struct {
 
 // LRU implements an LRU cache
 type LRU struct {
-	mu    sync.Mutex               // protect all things
+	mu    sync.RWMutex             // protect all things
 	size  int                      // max number of items.
 	items map[interface{}]*lruItem // active items
 	head  *lruItem                 // head of list
@@ -63,11 +63,12 @@ func (lru *LRU) push(item *lruItem) {
 // This operation will panic if the size is less than one.
 func (lru *LRU) Resize(size int) (evictedKeys []interface{},
 	evictedValues []interface{}) {
-	lru.mu.Lock()
-	defer lru.mu.Unlock()
 	if size <= 0 {
 		panic("invalid size")
 	}
+
+	lru.mu.Lock()
+	defer lru.mu.Unlock()
 	for size < len(lru.items) {
 		item := lru.evict()
 		evictedKeys = append(evictedKeys, item.key)
@@ -79,8 +80,8 @@ func (lru *LRU) Resize(size int) (evictedKeys []interface{},
 
 // Len returns the length of the lru cache
 func (lru *LRU) Len() int {
-	lru.mu.Lock()
-	defer lru.mu.Unlock()
+	lru.mu.RLock()
+	defer lru.mu.RUnlock()
 	return len(lru.items)
 }
 
@@ -139,6 +140,26 @@ func (lru *LRU) Get(key interface{}) (value interface{}, ok bool) {
 	return item.value, true
 }
 
+// Contains returns true if the key exists.
+func (lru *LRU) Contains(key interface{}) bool {
+	lru.mu.RLock()
+	defer lru.mu.RUnlock()
+	_, ok := lru.items[key]
+	return ok
+}
+
+// Peek returns the value for key value without updating
+// the recently used status.
+func (lru *LRU) Peek(key interface{}) (value interface{}, ok bool) {
+	lru.mu.RLock()
+	defer lru.mu.RUnlock()
+
+	if item := lru.items[key]; item != nil {
+		return item.value, true
+	}
+	return nil, false
+}
+
 // Delete a value for a key
 func (lru *LRU) Delete(key interface{}) (prev interface{}, deleted bool) {
 	lru.mu.Lock()
@@ -156,8 +177,8 @@ func (lru *LRU) Delete(key interface{}) (prev interface{}, deleted bool) {
 // least recently used items.
 // It's not safe to call other LRU operations while ranging.
 func (lru *LRU) Range(iter func(key interface{}, value interface{}) bool) {
-	lru.mu.Lock()
-	defer lru.mu.Unlock()
+	lru.mu.RLock()
+	defer lru.mu.RUnlock()
 	if head := lru.head; head != nil {
 		item := head.next
 		for item != lru.tail {
@@ -173,8 +194,8 @@ func (lru *LRU) Range(iter func(key interface{}, value interface{}) bool) {
 // most recently used items.
 // It's not safe to call other LRU operations while ranging.
 func (lru *LRU) Reverse(iter func(key interface{}, value interface{}) bool) {
-	lru.mu.Lock()
-	defer lru.mu.Unlock()
+	lru.mu.RLock()
+	defer lru.mu.RUnlock()
 	if tail := lru.tail; tail != nil {
 		item := tail.prev
 		for item != lru.head {

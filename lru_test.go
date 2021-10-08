@@ -118,6 +118,41 @@ func TestLRU(t *testing.T) {
 		t.Fatal("mismatch")
 	}
 
+	// Contains items
+	for i := 0; i < len(items); i++ {
+		ok := cache.Contains(items[i].key)
+		if i < len(items)-size {
+			if ok {
+				t.Fatal("expected false")
+			}
+		} else {
+			if !ok {
+				t.Fatal("expected true")
+			}
+		}
+	}
+
+	// Peek items
+	for i := 0; i < len(items); i++ {
+		value, ok := cache.Peek(items[i].key)
+		if i < len(items)-size {
+			if ok {
+				t.Fatal("expected false")
+			}
+			if value != nil {
+				t.Fatal("expected nil")
+			}
+		} else {
+			if !ok {
+				t.Fatal("expected true")
+			}
+			if value != items[i].val {
+				t.Fatalf("expected %v, got %v",
+					items[i].val, value)
+			}
+		}
+	}
+
 	// Get items
 	for i := 0; i < len(items); i++ {
 		value, ok := cache.Get(items[i].key)

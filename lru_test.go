@@ -14,7 +14,7 @@ func init() {
 }
 
 type tItem struct {
-	key interface{}
+	key string
 	val int
 }
 
@@ -29,14 +29,14 @@ func TestLRU(t *testing.T) {
 	size := DefaultSize
 
 	// Set items
-	var cache LRU
+	var cache LRU[string, int] = LRU[string, int]{}
 	for i := 0; i < len(items); i++ {
 		prev, replaced, evictedKey, evictedValue, evicted :=
 			cache.SetEvicted(items[i].key, items[i].val)
 		if replaced {
 			t.Fatal("expected false")
 		}
-		if prev != nil {
+		if prev != 0 {
 			t.Fatal("expected nil")
 		}
 		if evicted {
@@ -78,8 +78,8 @@ func TestLRU(t *testing.T) {
 
 	idx := size - 1
 	res := make([]tItem, size)
-	cache.Range(func(key, value interface{}) bool {
-		res[idx] = tItem{key: key, val: value.(int)}
+	cache.Range(func(key string, value int) bool {
+		res[idx] = tItem{key: key, val: value}
 		idx--
 		return true
 	})
@@ -89,8 +89,8 @@ func TestLRU(t *testing.T) {
 		}
 	}
 	var recent tItem
-	cache.Range(func(key, value interface{}) bool {
-		recent = tItem{key: key, val: value.(int)}
+	cache.Range(func(key string, value int) bool {
+		recent = tItem{key: key, val: value}
 		return false
 	})
 	if items[len(items)-1] != recent {
@@ -99,8 +99,8 @@ func TestLRU(t *testing.T) {
 
 	idx = size - 1
 	res = make([]tItem, size)
-	cache.Reverse(func(key, value interface{}) bool {
-		res[idx] = tItem{key: key, val: value.(int)}
+	cache.Reverse(func(key string, value int) bool {
+		res[idx] = tItem{key: key, val: value}
 		idx--
 		return true
 	})
@@ -110,8 +110,8 @@ func TestLRU(t *testing.T) {
 		}
 	}
 	var least tItem
-	cache.Reverse(func(key, value interface{}) bool {
-		least = tItem{key: key, val: value.(int)}
+	cache.Reverse(func(key string, value int) bool {
+		least = tItem{key: key, val: value}
 		return false
 	})
 	if items[len(items)-size] != least {
@@ -139,7 +139,7 @@ func TestLRU(t *testing.T) {
 			if ok {
 				t.Fatal("expected false")
 			}
-			if value != nil {
+			if value != 0 {
 				t.Fatal("expected nil")
 			}
 		} else {
@@ -160,7 +160,7 @@ func TestLRU(t *testing.T) {
 			if ok {
 				t.Fatal("expected false")
 			}
-			if value != nil {
+			if value != 0 {
 				t.Fatal("expected nil")
 			}
 		} else {
@@ -219,15 +219,15 @@ func TestLRU(t *testing.T) {
 	if deleted {
 		t.Fatal("expected false")
 	}
-	if prev != nil {
+	if prev != 0 {
 		t.Fatal("expected nil")
 	}
 
-	prev, replaced := cache.Set("hello", "world")
+	prev, replaced := cache.Set("hello", 1)
 	if replaced {
 		t.Fatal("expected false")
 	}
-	if prev != nil {
+	if prev != 0 {
 		t.Fatal("expected nil")
 	}
 }
@@ -239,18 +239,18 @@ func BenchmarkSet(b *testing.B) {
 	}
 	b.ResetTimer()
 	b.ReportAllocs()
-	var cache LRU
+	var cache LRU[string, int]
 	for i := 0; i < b.N; i++ {
 		cache.Set(items[i].key, items[i].val)
 	}
 }
 
 func TestLRUInt(t *testing.T) {
-	var cache LRU
+	var cache LRU[int, int]
 	cache.Set(123, 123)
 	cache.Set(123, 456)
 	v, _ := cache.Get(123)
-	if v.(int) != 456 {
+	if v != 456 {
 		t.Fatalf("expected %v, got %v", 456, v)
 	}
 }

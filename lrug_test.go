@@ -4,39 +4,32 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
-	"time"
 )
 
-func init() {
-	seed := time.Now().UnixNano()
-	println(seed)
-	rand.Seed(seed)
-}
-
-type tItem struct {
-	key interface{}
+type tItemg struct {
+	key string
 	val int
 }
 
-func TestLRU(t *testing.T) {
+func TestLRUG(t *testing.T) {
 	N := DefaultSize * 10
-	var items []tItem
+	var items []tItemg
 	vals := rand.Perm(N)
 	for i := 0; i < N; i++ {
-		items = append(items, tItem{key: fmt.Sprint(vals[i]), val: vals[i]})
+		items = append(items, tItemg{key: fmt.Sprint(vals[i]), val: vals[i]})
 	}
 
 	size := DefaultSize
 
 	// Set items
-	var cache LRU
+	var cache LRUG[string, int] = LRUG[string, int]{}
 	for i := 0; i < len(items); i++ {
 		prev, replaced, evictedKey, evictedValue, evicted :=
 			cache.SetEvicted(items[i].key, items[i].val)
 		if replaced {
 			t.Fatal("expected false")
 		}
-		if prev != nil {
+		if prev != 0 {
 			t.Fatal("expected nil")
 		}
 		if evicted {
@@ -77,9 +70,9 @@ func TestLRU(t *testing.T) {
 	size /= 2
 
 	idx := size - 1
-	res := make([]tItem, size)
-	cache.Range(func(key, value interface{}) bool {
-		res[idx] = tItem{key: key, val: value.(int)}
+	res := make([]tItemg, size)
+	cache.Range(func(key string, value int) bool {
+		res[idx] = tItemg{key: key, val: value}
 		idx--
 		return true
 	})
@@ -88,9 +81,9 @@ func TestLRU(t *testing.T) {
 			t.Fatal("mismatch")
 		}
 	}
-	var recent tItem
-	cache.Range(func(key, value interface{}) bool {
-		recent = tItem{key: key, val: value.(int)}
+	var recent tItemg
+	cache.Range(func(key string, value int) bool {
+		recent = tItemg{key: key, val: value}
 		return false
 	})
 	if items[len(items)-1] != recent {
@@ -98,9 +91,9 @@ func TestLRU(t *testing.T) {
 	}
 
 	idx = size - 1
-	res = make([]tItem, size)
-	cache.Reverse(func(key, value interface{}) bool {
-		res[idx] = tItem{key: key, val: value.(int)}
+	res = make([]tItemg, size)
+	cache.Reverse(func(key string, value int) bool {
+		res[idx] = tItemg{key: key, val: value}
 		idx--
 		return true
 	})
@@ -109,9 +102,9 @@ func TestLRU(t *testing.T) {
 			t.Fatal("mismatch")
 		}
 	}
-	var least tItem
-	cache.Reverse(func(key, value interface{}) bool {
-		least = tItem{key: key, val: value.(int)}
+	var least tItemg
+	cache.Reverse(func(key string, value int) bool {
+		least = tItemg{key: key, val: value}
 		return false
 	})
 	if items[len(items)-size] != least {
@@ -139,7 +132,7 @@ func TestLRU(t *testing.T) {
 			if ok {
 				t.Fatal("expected false")
 			}
-			if value != nil {
+			if value != 0 {
 				t.Fatal("expected nil")
 			}
 		} else {
@@ -160,7 +153,7 @@ func TestLRU(t *testing.T) {
 			if ok {
 				t.Fatal("expected false")
 			}
-			if value != nil {
+			if value != 0 {
 				t.Fatal("expected nil")
 			}
 		} else {
@@ -219,38 +212,38 @@ func TestLRU(t *testing.T) {
 	if deleted {
 		t.Fatal("expected false")
 	}
-	if prev != nil {
+	if prev != 0 {
 		t.Fatal("expected nil")
 	}
 
-	prev, replaced := cache.Set("hello", "world")
+	prev, replaced := cache.Set("hello", 1)
 	if replaced {
 		t.Fatal("expected false")
 	}
-	if prev != nil {
+	if prev != 0 {
 		t.Fatal("expected nil")
 	}
 }
 
-func BenchmarkSet(b *testing.B) {
-	items := make([]tItem, b.N)
+func BenchmarkSetG(b *testing.B) {
+	items := make([]tItemg, b.N)
 	for i := 0; i < b.N; i++ {
-		items[i] = tItem{key: fmt.Sprint(rand.Int())}
+		items[i] = tItemg{key: fmt.Sprint(rand.Int())}
 	}
 	b.ResetTimer()
 	b.ReportAllocs()
-	var cache LRU
+	var cache LRUG[string, int]
 	for i := 0; i < b.N; i++ {
 		cache.Set(items[i].key, items[i].val)
 	}
 }
 
-func TestLRUInt(t *testing.T) {
-	var cache LRU
+func TestLRUIntG(t *testing.T) {
+	var cache LRUG[int, int]
 	cache.Set(123, 123)
 	cache.Set(123, 456)
 	v, _ := cache.Get(123)
-	if v.(int) != 456 {
+	if v != 456 {
 		t.Fatalf("expected %v, got %v", 456, v)
 	}
 }

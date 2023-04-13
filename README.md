@@ -18,9 +18,11 @@ This will retrieve the library.
 
 ### Usage
 
+Note: this package also has a non-generic `tinylru.LRU` implementation.
+
 ```go
 // Create an LRU cache
-var cache tinylru.LRU[string, string]
+var cache tinylru.LRUG[string, string]
 
 // Set the cache size. This is the maximum number of items that the cache can
 // hold before evicting old items. The default size is 256.

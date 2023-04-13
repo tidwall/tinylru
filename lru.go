@@ -175,7 +175,6 @@ func (lru *LRU) Delete(key interface{}) (prev interface{}, deleted bool) {
 
 // Range iterates over all key/values in the order of most recently to
 // least recently used items.
-// It's not safe to call other LRU operations while ranging.
 func (lru *LRU) Range(iter func(key interface{}, value interface{}) bool) {
 	lru.mu.RLock()
 	defer lru.mu.RUnlock()
@@ -192,7 +191,6 @@ func (lru *LRU) Range(iter func(key interface{}, value interface{}) bool) {
 
 // Reverse iterates over all key/values in the order of least recently to
 // most recently used items.
-// It's not safe to call other LRU operations while ranging.
 func (lru *LRU) Reverse(iter func(key interface{}, value interface{}) bool) {
 	lru.mu.RLock()
 	defer lru.mu.RUnlock()

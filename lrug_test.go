@@ -247,3 +247,20 @@ func TestLRUIntG(t *testing.T) {
 		t.Fatalf("expected %v, got %v", 456, v)
 	}
 }
+
+func TestLRUClearG(t *testing.T) {
+	var cache LRUG[int, int]
+	cache.Set(123, 1230)
+	cache.Set(456, 4560)
+	if cache.Len() != 2 {
+		t.Fatalf("expected %v, got %v", 2, cache.Len())
+	}
+	cache.Clear()
+	if cache.Len() != 0 {
+		t.Fatalf("expected %v, got %v", 0, cache.Len())
+	}
+	prev, ok := cache.Get(123)
+	if prev != 0 || ok {
+		t.Fatalf("expected %v/%v, got %v/%v", 0, false, prev, ok)
+	}
+}

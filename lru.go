@@ -204,3 +204,13 @@ func (lru *LRU) Reverse(iter func(key interface{}, value interface{}) bool) {
 		}
 	}
 }
+
+// Clear will remove all key/values from the LRU cache
+func (lru *LRU) Clear() {
+	lru.mu.Lock()
+	defer lru.mu.Unlock()
+	lru.size = 0
+	lru.items = nil
+	lru.head = nil
+	lru.tail = nil
+}

@@ -171,7 +171,6 @@ func (lru *LRUG[Key, Value]) Delete(key Key) (prev Value, deleted bool) {
 
 // Range iterates over all key/values in the order of most recently to
 // least recently used items.
-// It's not safe to call other LRU operations while ranging.
 func (lru *LRUG[Key, Value]) Range(iter func(key Key, value Value) bool) {
 	lru.mu.RLock()
 	defer lru.mu.RUnlock()
@@ -188,7 +187,6 @@ func (lru *LRUG[Key, Value]) Range(iter func(key Key, value Value) bool) {
 
 // Reverse iterates over all key/values in the order of least recently to
 // most recently used items.
-// It's not safe to call other LRU operations while ranging.
 func (lru *LRUG[Key, Value]) Reverse(iter func(key Key, value Value) bool) {
 	lru.mu.RLock()
 	defer lru.mu.RUnlock()

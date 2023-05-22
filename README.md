@@ -1,6 +1,6 @@
 # `tinylru`
 
-[![GoDoc](https://godoc.org/github.com/MichaelMure/tinylru?status.svg)](https://godoc.org/github.com/MichaelMure/tinylru)
+[![GoDoc](https://godoc.org/github.com/tidwall/tinylru?status.svg)](https://godoc.org/github.com/tidwall/tinylru)
 
 A fast little LRU cache. 
 
@@ -11,7 +11,7 @@ A fast little LRU cache.
 To start using `tinylru`, install Go and run go get:
 
 ```
-$ go get -u github.com/MichaelMure/tinylru
+$ go get -u github.com/tidwall/tinylru
 ```
 
 This will retrieve the library.

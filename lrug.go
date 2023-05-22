@@ -200,3 +200,13 @@ func (lru *LRUG[Key, Value]) Reverse(iter func(key Key, value Value) bool) {
 		}
 	}
 }
+
+// Clear will remove all key/values from the LRU cache
+func (lru *LRUG[Key, Value]) Clear() {
+	lru.mu.Lock()
+	defer lru.mu.Unlock()
+	lru.size = 0
+	lru.items = nil
+	lru.head = nil
+	lru.tail = nil
+}
